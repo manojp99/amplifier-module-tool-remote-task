@@ -379,3 +379,60 @@ class TestRemoteTaskCollectToolExecution:
         assert not result.success
         assert "timeout" in result.error["message"]
         assert result.error["type"] == "TimeoutError"
+
+
+# ============================================================
+# mount() entry point
+# ============================================================
+
+
+class TestMount:
+    async def test_mount_registers_both_tools(self):
+        from unittest.mock import AsyncMock
+
+        from tool_remote_task import mount
+
+        coordinator = MagicMock()
+        coordinator.mount = AsyncMock()
+
+        await mount(coordinator, {})
+
+        assert coordinator.mount.call_count == 2
+
+        # Verify first call registers remote_task
+        call_1 = coordinator.mount.call_args_list[0]
+        assert call_1[0][0] == "tools"
+        assert call_1[1]["name"] == "remote_task"
+
+        # Verify second call registers remote_task_collect
+        call_2 = coordinator.mount.call_args_list[1]
+        assert call_2[0][0] == "tools"
+        assert call_2[1]["name"] == "remote_task_collect"
+
+    async def test_mount_tools_share_same_job_store(self):
+        from unittest.mock import AsyncMock
+
+        from tool_remote_task import mount
+
+        coordinator = MagicMock()
+        coordinator.mount = AsyncMock()
+
+        await mount(coordinator, {})
+
+        # Both tools should share the same JobStore instance
+        tool_1 = coordinator.mount.call_args_list[0][0][1]
+        tool_2 = coordinator.mount.call_args_list[1][0][1]
+        assert tool_1._job_store is tool_2._job_store
+
+    async def test_mount_works_with_no_config(self):
+        from unittest.mock import AsyncMock
+
+        from tool_remote_task import mount
+
+        coordinator = MagicMock()
+        coordinator.mount = AsyncMock()
+
+        # Config defaults to None
+        await mount(coordinator)
+
+        assert coordinator.mount.call_count == 2
