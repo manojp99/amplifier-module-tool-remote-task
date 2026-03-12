@@ -136,7 +136,9 @@ def test_run_background_returns_pid(mock_paramiko):
     pid = client.run_background("sleep 100")
 
     assert pid == 12345
-    mock_inner.exec_command.assert_called_once_with("nohup sleep 100 & echo $!")
+    mock_inner.exec_command.assert_called_once_with(
+        "setsid bash -c 'sleep 100' </dev/null >/dev/null 2>&1 & echo $!"
+    )
 
 
 @patch("tool_remote_task.ssh.paramiko")

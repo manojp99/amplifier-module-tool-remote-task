@@ -1,5 +1,7 @@
 """SSH client wrapper around paramiko."""
 
+import shlex
+
 import paramiko
 
 
@@ -48,12 +50,22 @@ class SSHClient:
         return stdout.read().decode(), stderr.read().decode(), exit_code
 
     def run_background(self, command: str) -> int:
-        """Run a command in the background via nohup.
+        """Run a command in the background, fully detached from the SSH channel.
+
+        Uses setsid to create a new process session so the process survives
+        after the SSH channel closes. Wraps in bash -c so any output
+        redirections inside the command (e.g. > output_file) take effect
+        within the subshell. The outer </dev/null >/dev/null 2>&1 prevents
+        the SSH channel from hanging on open file descriptors.
 
         Returns:
             The PID of the backgrounded process on the remote host.
         """
-        wrapped = f"nohup {command} & echo $!"
+        pid_var = "$!"
+        wrapped = (
+            f"setsid bash -c {shlex.quote(command)} "
+            f"</dev/null >/dev/null 2>&1 & echo {pid_var}"
+        )
         _stdin, stdout, _stderr = self._client.exec_command(wrapped)
         pid_str = stdout.read().decode().strip()
         return int(pid_str)

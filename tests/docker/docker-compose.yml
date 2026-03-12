@@ -1,0 +1,15 @@
+services:
+  ssh-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "2222:22"
+    volumes:
+      # Bind-mount your public key so the container trusts your local SSH key
+      - "${SSH_PUBLIC_KEY_PATH:-$HOME/.ssh/id_ed25519.pub}:/home/testuser/.ssh/authorized_keys:ro"
+    healthcheck:
+      test: ["CMD", "ssh-keyscan", "-p", "22", "localhost"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
