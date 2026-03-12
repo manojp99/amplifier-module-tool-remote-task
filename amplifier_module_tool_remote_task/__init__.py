@@ -1,7 +1,7 @@
 """Amplifier tool module for delegating tasks to remote agents via SSH."""
 
-from tool_remote_task.jobs import JobStore
-from tool_remote_task.tool import RemoteTaskCollectTool, RemoteTaskTool
+from amplifier_module_tool_remote_task.jobs import JobStore
+from amplifier_module_tool_remote_task.tool import RemoteTaskCollectTool, RemoteTaskTool
 
 
 async def mount(coordinator, config: dict | None = None) -> None:

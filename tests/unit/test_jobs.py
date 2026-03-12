@@ -2,7 +2,7 @@
 
 import pytest
 
-from tool_remote_task.jobs import JobStore
+from amplifier_module_tool_remote_task.jobs import JobStore
 
 
 def test_create_job_returns_string_id():

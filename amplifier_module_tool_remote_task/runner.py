@@ -4,8 +4,8 @@ import shlex
 import time
 import uuid
 
-from tool_remote_task.jobs import Job, JobStore
-from tool_remote_task.ssh import SSHClient
+from amplifier_module_tool_remote_task.jobs import Job, JobStore
+from amplifier_module_tool_remote_task.ssh import SSHClient
 
 
 class RemoteTaskError(Exception):

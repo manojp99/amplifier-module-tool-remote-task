@@ -4,9 +4,9 @@ from typing import Any
 
 from amplifier_core import ToolResult
 
-from tool_remote_task.jobs import JobStore
-from tool_remote_task.runner import RemoteTaskError, collect, run_async, run_sync
-from tool_remote_task.ssh import SSHClient
+from amplifier_module_tool_remote_task.jobs import JobStore
+from amplifier_module_tool_remote_task.runner import RemoteTaskError, collect, run_async, run_sync
+from amplifier_module_tool_remote_task.ssh import SSHClient
 
 
 class RemoteTaskTool:
@@ -29,6 +29,10 @@ class RemoteTaskTool:
             "Use mode='sync' to wait for the result, or mode='async' to "
             "dispatch and collect later with remote_task_collect."
         )
+
+    @property
+    def input_schema(self) -> dict:
+        return self.get_schema()
 
     def get_schema(self) -> dict:
         return {
@@ -177,6 +181,10 @@ class RemoteTaskCollectTool:
             "Collect the result of an async remote task by job ID. "
             "Returns 'pending' if still running, or the result if complete."
         )
+
+    @property
+    def input_schema(self) -> dict:
+        return self.get_schema()
 
     def get_schema(self) -> dict:
         return {

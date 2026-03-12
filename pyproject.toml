@@ -8,7 +8,7 @@ dependencies = [
 ]
 
 [project.entry-points."amplifier.modules"]
-tool-remote-task = "tool_remote_task:mount"
+tool-remote-task = "amplifier_module_tool_remote_task:mount"
 
 [build-system]
 requires = ["hatchling"]
@@ -18,7 +18,7 @@ build-backend = "hatchling.build"
 package = true
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/tool_remote_task"]
+packages = ["amplifier_module_tool_remote_task"]
 
 [tool.hatch.metadata]
 allow-direct-references = true

@@ -1,10 +1,10 @@
 """Tests for the SSH client wrapper. All tests mock paramiko."""
 from unittest.mock import MagicMock, patch
 
-from tool_remote_task.ssh import SSHClient
+from amplifier_module_tool_remote_task.ssh import SSHClient
 
 
-@patch("tool_remote_task.ssh.paramiko")
+@patch("amplifier_module_tool_remote_task.ssh.paramiko")
 def test_connect_parses_user_at_host(mock_paramiko):
     mock_inner = MagicMock()
     mock_paramiko.SSHClient.return_value = mock_inner
@@ -18,7 +18,7 @@ def test_connect_parses_user_at_host(mock_paramiko):
     )
 
 
-@patch("tool_remote_task.ssh.paramiko")
+@patch("amplifier_module_tool_remote_task.ssh.paramiko")
 def test_connect_hostname_only_no_username(mock_paramiko):
     mock_inner = MagicMock()
     mock_paramiko.SSHClient.return_value = mock_inner
@@ -32,7 +32,7 @@ def test_connect_hostname_only_no_username(mock_paramiko):
     )
 
 
-@patch("tool_remote_task.ssh.paramiko")
+@patch("amplifier_module_tool_remote_task.ssh.paramiko")
 def test_connect_with_custom_port(mock_paramiko):
     mock_inner = MagicMock()
     mock_paramiko.SSHClient.return_value = mock_inner
@@ -46,7 +46,7 @@ def test_connect_with_custom_port(mock_paramiko):
     )
 
 
-@patch("tool_remote_task.ssh.paramiko")
+@patch("amplifier_module_tool_remote_task.ssh.paramiko")
 def test_connect_with_key_path(mock_paramiko):
     mock_inner = MagicMock()
     mock_paramiko.SSHClient.return_value = mock_inner
@@ -62,7 +62,7 @@ def test_connect_with_key_path(mock_paramiko):
     )
 
 
-@patch("tool_remote_task.ssh.paramiko")
+@patch("amplifier_module_tool_remote_task.ssh.paramiko")
 def test_connect_all_options(mock_paramiko):
     mock_inner = MagicMock()
     mock_paramiko.SSHClient.return_value = mock_inner
@@ -79,7 +79,7 @@ def test_connect_all_options(mock_paramiko):
     )
 
 
-@patch("tool_remote_task.ssh.paramiko")
+@patch("amplifier_module_tool_remote_task.ssh.paramiko")
 def test_run_command_returns_stdout_stderr_exit_code(mock_paramiko):
     mock_inner = MagicMock()
     mock_paramiko.SSHClient.return_value = mock_inner
@@ -101,7 +101,7 @@ def test_run_command_returns_stdout_stderr_exit_code(mock_paramiko):
     mock_inner.exec_command.assert_called_once_with("echo hello", timeout=30)
 
 
-@patch("tool_remote_task.ssh.paramiko")
+@patch("amplifier_module_tool_remote_task.ssh.paramiko")
 def test_run_command_captures_nonzero_exit(mock_paramiko):
     mock_inner = MagicMock()
     mock_paramiko.SSHClient.return_value = mock_inner
@@ -122,7 +122,7 @@ def test_run_command_captures_nonzero_exit(mock_paramiko):
     assert exit_code == 1
 
 
-@patch("tool_remote_task.ssh.paramiko")
+@patch("amplifier_module_tool_remote_task.ssh.paramiko")
 def test_run_background_returns_pid(mock_paramiko):
     mock_inner = MagicMock()
     mock_paramiko.SSHClient.return_value = mock_inner
@@ -141,7 +141,7 @@ def test_run_background_returns_pid(mock_paramiko):
     )
 
 
-@patch("tool_remote_task.ssh.paramiko")
+@patch("amplifier_module_tool_remote_task.ssh.paramiko")
 def test_close_closes_paramiko_client(mock_paramiko):
     mock_inner = MagicMock()
     mock_paramiko.SSHClient.return_value = mock_inner

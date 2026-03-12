@@ -2,8 +2,8 @@
 import pytest
 from unittest.mock import MagicMock, patch
 
-from tool_remote_task.jobs import Job, JobStore
-from tool_remote_task.runner import (
+from amplifier_module_tool_remote_task.jobs import Job, JobStore
+from amplifier_module_tool_remote_task.runner import (
     RemoteTaskError,
     collect,
     run_async,
@@ -181,7 +181,7 @@ def test_collect_cleans_up_output_file():
     assert "rm -f /tmp/test.out" in rm_call[0][0]
 
 
-@patch("tool_remote_task.runner.time.sleep")
+@patch("amplifier_module_tool_remote_task.runner.time.sleep")
 def test_collect_wait_polls_until_done(mock_sleep):
     client = MagicMock()
     client.run_command.side_effect = [
@@ -200,7 +200,7 @@ def test_collect_wait_polls_until_done(mock_sleep):
     mock_sleep.assert_called_with(5)
 
 
-@patch("tool_remote_task.runner.time.sleep")
+@patch("amplifier_module_tool_remote_task.runner.time.sleep")
 def test_collect_wait_raises_on_timeout(mock_sleep):
     client = MagicMock()
     # Always running — never finishes

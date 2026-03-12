@@ -6,9 +6,9 @@ Mocks SSHClient and runner functions — no real SSH connections.
 import pytest
 from unittest.mock import MagicMock, patch
 
-from tool_remote_task.jobs import JobStore
-from tool_remote_task.runner import RemoteTaskError
-from tool_remote_task.tool import RemoteTaskCollectTool, RemoteTaskTool
+from amplifier_module_tool_remote_task.jobs import JobStore
+from amplifier_module_tool_remote_task.runner import RemoteTaskError
+from amplifier_module_tool_remote_task.tool import RemoteTaskCollectTool, RemoteTaskTool
 
 
 # ============================================================
@@ -76,8 +76,8 @@ class TestRemoteTaskToolValidation:
 
 
 class TestRemoteTaskToolSync:
-    @patch("tool_remote_task.tool.SSHClient")
-    @patch("tool_remote_task.tool.run_sync")
+    @patch("amplifier_module_tool_remote_task.tool.SSHClient")
+    @patch("amplifier_module_tool_remote_task.tool.run_sync")
     async def test_sync_success_returns_output(self, mock_run_sync, mock_ssh_class):
         mock_client = MagicMock()
         mock_ssh_class.return_value = mock_client
@@ -99,8 +99,8 @@ class TestRemoteTaskToolSync:
         )
         mock_client.close.assert_called_once()
 
-    @patch("tool_remote_task.tool.SSHClient")
-    @patch("tool_remote_task.tool.run_sync")
+    @patch("amplifier_module_tool_remote_task.tool.SSHClient")
+    @patch("amplifier_module_tool_remote_task.tool.run_sync")
     async def test_sync_custom_timeout(self, mock_run_sync, mock_ssh_class):
         mock_ssh_class.return_value = MagicMock()
         mock_run_sync.return_value = "ok"
@@ -112,8 +112,8 @@ class TestRemoteTaskToolSync:
 
         assert mock_run_sync.call_args[1]["timeout"] == 60
 
-    @patch("tool_remote_task.tool.SSHClient")
-    @patch("tool_remote_task.tool.run_sync")
+    @patch("amplifier_module_tool_remote_task.tool.SSHClient")
+    @patch("amplifier_module_tool_remote_task.tool.run_sync")
     async def test_sync_custom_ssh_port_and_key(self, mock_run_sync, mock_ssh_class):
         mock_client = MagicMock()
         mock_ssh_class.return_value = mock_client
@@ -131,8 +131,8 @@ class TestRemoteTaskToolSync:
 
 
 class TestRemoteTaskToolAsync:
-    @patch("tool_remote_task.tool.SSHClient")
-    @patch("tool_remote_task.tool.run_async")
+    @patch("amplifier_module_tool_remote_task.tool.SSHClient")
+    @patch("amplifier_module_tool_remote_task.tool.run_async")
     async def test_async_returns_job_id(self, mock_run_async, mock_ssh_class):
         mock_client = MagicMock()
         mock_ssh_class.return_value = mock_client
@@ -153,8 +153,8 @@ class TestRemoteTaskToolAsync:
         )
         mock_client.close.assert_called_once()
 
-    @patch("tool_remote_task.tool.SSHClient")
-    @patch("tool_remote_task.tool.run_async")
+    @patch("amplifier_module_tool_remote_task.tool.SSHClient")
+    @patch("amplifier_module_tool_remote_task.tool.run_async")
     async def test_async_passes_ssh_details(self, mock_run_async, mock_ssh_class):
         mock_ssh_class.return_value = MagicMock()
         mock_run_async.return_value = "job-123"
@@ -171,7 +171,7 @@ class TestRemoteTaskToolAsync:
 
 
 class TestRemoteTaskToolErrors:
-    @patch("tool_remote_task.tool.SSHClient")
+    @patch("amplifier_module_tool_remote_task.tool.SSHClient")
     async def test_ssh_connection_failure(self, mock_ssh_class):
         mock_client = MagicMock()
         mock_client.connect.side_effect = Exception("Connection refused")
@@ -189,8 +189,8 @@ class TestRemoteTaskToolErrors:
         # Client close is still called (cleanup in finally)
         mock_client.close.assert_called_once()
 
-    @patch("tool_remote_task.tool.SSHClient")
-    @patch("tool_remote_task.tool.run_sync")
+    @patch("amplifier_module_tool_remote_task.tool.SSHClient")
+    @patch("amplifier_module_tool_remote_task.tool.run_sync")
     async def test_amplifier_not_installed(self, mock_run_sync, mock_ssh_class):
         mock_ssh_class.return_value = MagicMock()
         mock_run_sync.side_effect = RemoteTaskError(
@@ -206,8 +206,8 @@ class TestRemoteTaskToolErrors:
         assert "not installed" in result.error["message"]
         assert result.error["type"] == "NotInstalledError"
 
-    @patch("tool_remote_task.tool.SSHClient")
-    @patch("tool_remote_task.tool.run_sync")
+    @patch("amplifier_module_tool_remote_task.tool.SSHClient")
+    @patch("amplifier_module_tool_remote_task.tool.run_sync")
     async def test_task_failed_nonzero_exit(self, mock_run_sync, mock_ssh_class):
         mock_ssh_class.return_value = MagicMock()
         mock_run_sync.side_effect = RemoteTaskError(
@@ -277,8 +277,8 @@ class TestRemoteTaskCollectToolExecution:
         assert result.success is True
         assert result.output == "cached result"
 
-    @patch("tool_remote_task.tool.SSHClient")
-    @patch("tool_remote_task.tool.collect")
+    @patch("amplifier_module_tool_remote_task.tool.SSHClient")
+    @patch("amplifier_module_tool_remote_task.tool.collect")
     async def test_pending_returns_pending(self, mock_collect, mock_ssh_class):
         mock_ssh_class.return_value = MagicMock()
         mock_collect.return_value = "pending"
@@ -294,8 +294,8 @@ class TestRemoteTaskCollectToolExecution:
         assert result.success is True
         assert result.output == "pending"
 
-    @patch("tool_remote_task.tool.SSHClient")
-    @patch("tool_remote_task.tool.collect")
+    @patch("amplifier_module_tool_remote_task.tool.SSHClient")
+    @patch("amplifier_module_tool_remote_task.tool.collect")
     async def test_complete_returns_result_and_marks_job(
         self, mock_collect, mock_ssh_class
     ):
@@ -317,8 +317,8 @@ class TestRemoteTaskCollectToolExecution:
         assert job.status == "complete"
         assert job.result == "task output"
 
-    @patch("tool_remote_task.tool.SSHClient")
-    @patch("tool_remote_task.tool.collect")
+    @patch("amplifier_module_tool_remote_task.tool.SSHClient")
+    @patch("amplifier_module_tool_remote_task.tool.collect")
     async def test_connects_using_stored_ssh_details(
         self, mock_collect, mock_ssh_class
     ):
@@ -343,7 +343,7 @@ class TestRemoteTaskCollectToolExecution:
         )
         mock_client.close.assert_called_once()
 
-    @patch("tool_remote_task.tool.SSHClient")
+    @patch("amplifier_module_tool_remote_task.tool.SSHClient")
     async def test_ssh_failure_during_collect(self, mock_ssh_class):
         mock_client = MagicMock()
         mock_client.connect.side_effect = Exception("Connection refused")
@@ -361,8 +361,8 @@ class TestRemoteTaskCollectToolExecution:
         assert "SSH connection to user@host failed" in result.error["message"]
         mock_client.close.assert_called_once()
 
-    @patch("tool_remote_task.tool.SSHClient")
-    @patch("tool_remote_task.tool.collect")
+    @patch("amplifier_module_tool_remote_task.tool.SSHClient")
+    @patch("amplifier_module_tool_remote_task.tool.collect")
     async def test_timeout_during_collect(self, mock_collect, mock_ssh_class):
         mock_ssh_class.return_value = MagicMock()
         mock_collect.side_effect = RemoteTaskError(
@@ -391,7 +391,7 @@ class TestMount:
     async def test_mount_registers_both_tools(self):
         from unittest.mock import AsyncMock
 
-        from tool_remote_task import mount
+        from amplifier_module_tool_remote_task import mount
 
         coordinator = MagicMock()
         coordinator.mount = AsyncMock()
@@ -413,7 +413,7 @@ class TestMount:
     async def test_mount_tools_share_same_job_store(self):
         from unittest.mock import AsyncMock
 
-        from tool_remote_task import mount
+        from amplifier_module_tool_remote_task import mount
 
         coordinator = MagicMock()
         coordinator.mount = AsyncMock()
@@ -428,7 +428,7 @@ class TestMount:
     async def test_mount_works_with_no_config(self):
         from unittest.mock import AsyncMock
 
-        from tool_remote_task import mount
+        from amplifier_module_tool_remote_task import mount
 
         coordinator = MagicMock()
         coordinator.mount = AsyncMock()
@@ -453,8 +453,8 @@ class TestRemoteTaskToolWorkingDir:
         # Not required — optional
         assert "working_dir" not in schema["required"]
 
-    @patch("tool_remote_task.tool.SSHClient")
-    @patch("tool_remote_task.tool.run_sync")
+    @patch("amplifier_module_tool_remote_task.tool.SSHClient")
+    @patch("amplifier_module_tool_remote_task.tool.run_sync")
     async def test_working_dir_passed_to_run_sync(self, mock_run_sync, mock_ssh_class):
         mock_ssh_class.return_value = MagicMock()
         mock_run_sync.return_value = "ok"
@@ -467,8 +467,8 @@ class TestRemoteTaskToolWorkingDir:
 
         assert mock_run_sync.call_args[1]["working_dir"] == "/projects/myapp"
 
-    @patch("tool_remote_task.tool.SSHClient")
-    @patch("tool_remote_task.tool.run_async")
+    @patch("amplifier_module_tool_remote_task.tool.SSHClient")
+    @patch("amplifier_module_tool_remote_task.tool.run_async")
     async def test_working_dir_passed_to_run_async(self, mock_run_async, mock_ssh_class):
         mock_ssh_class.return_value = MagicMock()
         mock_run_async.return_value = "job-123"
@@ -481,8 +481,8 @@ class TestRemoteTaskToolWorkingDir:
 
         assert mock_run_async.call_args[1]["working_dir"] == "/projects/myapp"
 
-    @patch("tool_remote_task.tool.SSHClient")
-    @patch("tool_remote_task.tool.run_sync")
+    @patch("amplifier_module_tool_remote_task.tool.SSHClient")
+    @patch("amplifier_module_tool_remote_task.tool.run_sync")
     async def test_working_dir_defaults_to_none(self, mock_run_sync, mock_ssh_class):
         mock_ssh_class.return_value = MagicMock()
         mock_run_sync.return_value = "ok"
