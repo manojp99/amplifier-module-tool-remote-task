@@ -232,3 +232,44 @@ def test_collect_raises_when_output_file_missing():
     )
     with pytest.raises(RemoteTaskError, match="output not found for job abc"):
         collect(client, job)
+
+
+# --- working_dir tests ---
+
+
+def test_run_sync_with_working_dir_prefixes_cd():
+    client = _mock_client(("ok\n", "", 0))
+    run_sync(client, "list files", host="user@host", working_dir="/projects/myapp")
+    command = client.run_command.call_args[0][0]
+    assert "cd " in command
+    assert "/projects/myapp" in command
+    assert "amplifier run" in command
+
+
+def test_run_sync_without_working_dir_no_cd():
+    client = _mock_client(("ok\n", "", 0))
+    run_sync(client, "list files", host="user@host")
+    command = client.run_command.call_args[0][0]
+    assert not command.startswith("cd")
+    assert command.startswith("amplifier run")
+
+
+def test_run_async_with_working_dir_prefixes_cd():
+    client = MagicMock()
+    client.run_background.return_value = 9876
+    store = JobStore()
+    run_async(client, "run tests", host="user@host", job_store=store,
+              working_dir="/projects/myapp")
+    command = client.run_background.call_args[0][0]
+    assert "cd " in command
+    assert "/projects/myapp" in command
+    assert "amplifier run" in command
+
+
+def test_run_async_without_working_dir_no_cd():
+    client = MagicMock()
+    client.run_background.return_value = 9876
+    store = JobStore()
+    run_async(client, "run tests", host="user@host", job_store=store)
+    command = client.run_background.call_args[0][0]
+    assert "cd " not in command

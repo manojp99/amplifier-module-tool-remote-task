@@ -69,6 +69,15 @@ class RemoteTaskTool:
                         "(falls back to SSH agent if omitted)"
                     ),
                 },
+                "working_dir": {
+                    "type": "string",
+                    "description": (
+                        "Directory on the remote host to run Amplifier in. "
+                        "Defaults to the SSH session home directory. "
+                        "Use this to target a specific project, e.g. "
+                        "'/home/user/myproject'."
+                    ),
+                },
             },
             "required": ["host", "task", "mode"],
         }
@@ -101,6 +110,7 @@ class RemoteTaskTool:
         timeout = input.get("timeout", 300)
         ssh_port = input.get("ssh_port", 22)
         ssh_key = input.get("ssh_key")
+        working_dir = input.get("working_dir")
 
         client = SSHClient()
         try:
@@ -119,7 +129,8 @@ class RemoteTaskTool:
 
             if mode == "sync":
                 result = run_sync(
-                    client, task, host=host, timeout=timeout
+                    client, task, host=host, timeout=timeout,
+                    working_dir=working_dir,
                 )
                 return ToolResult(success=True, output=result)
             else:
@@ -130,6 +141,7 @@ class RemoteTaskTool:
                     job_store=self._job_store,
                     ssh_port=ssh_port,
                     ssh_key=ssh_key,
+                    working_dir=working_dir,
                 )
                 return ToolResult(
                     success=True,

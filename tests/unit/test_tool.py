@@ -94,7 +94,8 @@ class TestRemoteTaskToolSync:
             "user@host", port=22, key_path=None
         )
         mock_run_sync.assert_called_once_with(
-            mock_client, "describe files", host="user@host", timeout=300
+            mock_client, "describe files", host="user@host", timeout=300,
+            working_dir=None,
         )
         mock_client.close.assert_called_once()
 
@@ -148,7 +149,7 @@ class TestRemoteTaskToolAsync:
         mock_run_async.assert_called_once_with(
             mock_client, "run tests",
             host="user@host", job_store=job_store,
-            ssh_port=22, ssh_key=None,
+            ssh_port=22, ssh_key=None, working_dir=None,
         )
         mock_client.close.assert_called_once()
 
@@ -436,3 +437,59 @@ class TestMount:
         await mount(coordinator)
 
         assert coordinator.mount.call_count == 2
+
+
+# ============================================================
+# working_dir support
+# ============================================================
+
+
+class TestRemoteTaskToolWorkingDir:
+    def test_schema_has_working_dir_property(self):
+        tool = RemoteTaskTool(JobStore())
+        schema = tool.get_schema()
+        assert "working_dir" in schema["properties"]
+        assert schema["properties"]["working_dir"]["type"] == "string"
+        # Not required — optional
+        assert "working_dir" not in schema["required"]
+
+    @patch("tool_remote_task.tool.SSHClient")
+    @patch("tool_remote_task.tool.run_sync")
+    async def test_working_dir_passed_to_run_sync(self, mock_run_sync, mock_ssh_class):
+        mock_ssh_class.return_value = MagicMock()
+        mock_run_sync.return_value = "ok"
+
+        tool = RemoteTaskTool(JobStore())
+        await tool.execute({
+            "host": "user@host", "task": "list files", "mode": "sync",
+            "working_dir": "/projects/myapp",
+        })
+
+        assert mock_run_sync.call_args[1]["working_dir"] == "/projects/myapp"
+
+    @patch("tool_remote_task.tool.SSHClient")
+    @patch("tool_remote_task.tool.run_async")
+    async def test_working_dir_passed_to_run_async(self, mock_run_async, mock_ssh_class):
+        mock_ssh_class.return_value = MagicMock()
+        mock_run_async.return_value = "job-123"
+
+        tool = RemoteTaskTool(JobStore())
+        await tool.execute({
+            "host": "user@host", "task": "run tests", "mode": "async",
+            "working_dir": "/projects/myapp",
+        })
+
+        assert mock_run_async.call_args[1]["working_dir"] == "/projects/myapp"
+
+    @patch("tool_remote_task.tool.SSHClient")
+    @patch("tool_remote_task.tool.run_sync")
+    async def test_working_dir_defaults_to_none(self, mock_run_sync, mock_ssh_class):
+        mock_ssh_class.return_value = MagicMock()
+        mock_run_sync.return_value = "ok"
+
+        tool = RemoteTaskTool(JobStore())
+        await tool.execute({
+            "host": "user@host", "task": "task", "mode": "sync",
+        })
+
+        assert mock_run_sync.call_args[1]["working_dir"] is None

@@ -21,14 +21,30 @@ class RemoteTaskError(Exception):
 
 
 def run_sync(
-    client: SSHClient, task: str, host: str, timeout: int = 300
+    client: SSHClient,
+    task: str,
+    host: str,
+    timeout: int = 300,
+    working_dir: str | None = None,
 ) -> str:
     """Run a task synchronously on a remote host and return the output.
+
+    Args:
+        client: Connected SSH client.
+        task: Natural language task description.
+        host: SSH target (for error messages).
+        timeout: Max seconds to wait (default 300).
+        working_dir: Remote directory to run Amplifier in. If None, uses
+            the SSH session default (typically the home directory).
 
     Raises:
         RemoteTaskError: If amplifier is not installed or the task fails.
     """
-    command = f"amplifier run {shlex.quote(task)}"
+    amplifier_cmd = f"amplifier run {shlex.quote(task)}"
+    if working_dir:
+        command = f"cd {shlex.quote(working_dir)} && {amplifier_cmd}"
+    else:
+        command = amplifier_cmd
     stdout, stderr, exit_code = client.run_command(command, timeout=timeout)
 
     if exit_code != 0:
@@ -52,16 +68,25 @@ def run_async(
     job_store: JobStore,
     ssh_port: int = 22,
     ssh_key: str | None = None,
+    working_dir: str | None = None,
 ) -> str:
     """Dispatch a task asynchronously on a remote host and return a job ID.
 
-    The command runs in the background via nohup. Output is redirected
-    to a temp file on the remote host. The job is tracked in the local
-    job store for later collection.
+    The command runs in the background. Output is redirected to a temp
+    file on the remote host. The job is tracked in the local job store
+    for later collection.
+
+    Args:
+        working_dir: Remote directory to run Amplifier in. If None, uses
+            the SSH session default (typically the home directory).
     """
     file_id = str(uuid.uuid4())
     output_file = f"/tmp/amplifier-job-{file_id}.out"
-    command = f"amplifier run {shlex.quote(task)} > {output_file} 2>&1"
+    amplifier_cmd = f"amplifier run {shlex.quote(task)} > {output_file} 2>&1"
+    if working_dir:
+        command = f"cd {shlex.quote(working_dir)} && {amplifier_cmd}"
+    else:
+        command = amplifier_cmd
     pid = client.run_background(command)
 
     job_id = job_store.create_job(
