@@ -1,5 +1,6 @@
 """Tool protocol classes for remote task dispatch and collection."""
 
+import json
 from typing import Any
 
 from amplifier_core import ToolResult
@@ -147,9 +148,14 @@ class RemoteTaskTool:
                     ssh_key=ssh_key,
                     working_dir=working_dir,
                 )
+                job = self._job_store.get_job(job_id)
                 return ToolResult(
                     success=True,
-                    output=f"Async job dispatched. job_id: {job_id}",
+                    output=json.dumps({
+                        "status": "dispatched",
+                        "job_id": job_id,
+                        "remote_session_id": job.remote_session_id,
+                    }),
                 )
         except RemoteTaskError as e:
             return ToolResult(

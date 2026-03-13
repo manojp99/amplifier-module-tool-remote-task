@@ -15,6 +15,7 @@ class Job:
     output_file: str
     ssh_port: int = 22
     ssh_key: str | None = None
+    remote_session_id: str | None = None
     status: Literal["pending", "complete", "error"] = "pending"
     result: str | None = None
 
@@ -35,6 +36,7 @@ class JobStore:
         output_file: str,
         ssh_port: int = 22,
         ssh_key: str | None = None,
+        remote_session_id: str | None = None,
     ) -> str:
         """Create a new job and return its ID."""
         job_id = str(uuid.uuid4())
@@ -45,6 +47,7 @@ class JobStore:
             output_file=output_file,
             ssh_port=ssh_port,
             ssh_key=ssh_key,
+            remote_session_id=remote_session_id,
         )
         return job_id
 
