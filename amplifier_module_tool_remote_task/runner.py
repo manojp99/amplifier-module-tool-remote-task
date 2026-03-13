@@ -20,6 +20,34 @@ class RemoteTaskError(Exception):
         self.error_type = error_type
 
 
+
+def _poll_session_id(
+    client: SSHClient,
+    output_file: str,
+    timeout: int = 10,
+) -> str | None:
+    """Poll the output file for the Amplifier session ID.
+
+    Amplifier prints 'Session ID: <uuid>' in the first few lines of
+    output. We poll the temp file for up to `timeout` seconds to
+    extract it before returning to the caller.
+
+    Returns the session ID string, or None if not found in time.
+    """
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        time.sleep(0.5)
+        stdout, _, exit_code = client.run_command(
+            f"grep -m1 'Session ID:' {output_file} 2>/dev/null",
+            timeout=5,
+        )
+        if exit_code == 0 and stdout.strip():
+            parts = stdout.strip().split("Session ID:")
+            if len(parts) == 2:
+                return parts[1].strip()
+    return None
+
+
 def run_sync(
     client: SSHClient,
     task: str,
@@ -89,12 +117,15 @@ def run_async(
         command = amplifier_cmd
     pid = client.run_background(command)
 
+    remote_session_id = _poll_session_id(client, output_file)
+
     job_id = job_store.create_job(
         host=host,
         remote_pid=pid,
         output_file=output_file,
         ssh_port=ssh_port,
         ssh_key=ssh_key,
+        remote_session_id=remote_session_id,
     )
     return job_id
 
@@ -149,6 +180,16 @@ def collect(
         f"cat {job.output_file}", timeout=30
     )
     if exit_code != 0:
+        # Fallback: if the temp file is gone but we have the remote
+        # session ID, use `amplifier session show` to retrieve output.
+        if job.remote_session_id:
+            fallback_stdout, _, fallback_exit = client.run_command(
+                f"amplifier session show {job.remote_session_id}",
+                timeout=30,
+            )
+            if fallback_exit == 0 and fallback_stdout.strip():
+                client.run_command(f"rm -f {job.output_file}", timeout=10)
+                return fallback_stdout.strip()
         raise RemoteTaskError(
             f"output not found for job {job.job_id}",
             "OutputNotFoundError",

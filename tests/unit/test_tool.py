@@ -139,6 +139,13 @@ class TestRemoteTaskToolAsync:
         mock_run_async.return_value = "job-abc-123"
 
         job_store = JobStore()
+        # Pre-populate store so tool.execute can retrieve the job after run_async returns
+        job_store.create_job.__func__  # ensure method exists
+        from amplifier_module_tool_remote_task.jobs import Job
+        job_store._jobs["job-abc-123"] = Job(
+            job_id="job-abc-123", host="user@host", remote_pid=1234,
+            output_file="/tmp/test.out", remote_session_id=None,
+        )
         tool = RemoteTaskTool(job_store)
         result = await tool.execute({
             "host": "user@host", "task": "run tests", "mode": "async",

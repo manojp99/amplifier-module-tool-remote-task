@@ -71,7 +71,8 @@ def test_run_sync_passes_timeout_to_client():
 # --- run_async tests ---
 
 
-def test_run_async_returns_job_id_string():
+@patch("amplifier_module_tool_remote_task.runner._poll_session_id", return_value=None)
+def test_run_async_returns_job_id_string(mock_poll):
     client = MagicMock()
     client.run_background.return_value = 9876
     store = JobStore()
@@ -82,7 +83,8 @@ def test_run_async_returns_job_id_string():
     assert len(job_id) > 0
 
 
-def test_run_async_stores_job_with_correct_fields():
+@patch("amplifier_module_tool_remote_task.runner._poll_session_id", return_value=None)
+def test_run_async_stores_job_with_correct_fields(mock_poll):
     client = MagicMock()
     client.run_background.return_value = 9876
     store = JobStore()
@@ -98,7 +100,8 @@ def test_run_async_stores_job_with_correct_fields():
     assert job.status == "pending"
 
 
-def test_run_async_stores_ssh_connection_details():
+@patch("amplifier_module_tool_remote_task.runner._poll_session_id", return_value=None)
+def test_run_async_stores_ssh_connection_details(mock_poll):
     client = MagicMock()
     client.run_background.return_value = 9876
     store = JobStore()
@@ -117,7 +120,8 @@ def test_run_async_stores_ssh_connection_details():
     assert job.ssh_key == "/path/to/key"
 
 
-def test_run_async_command_redirects_to_output_file():
+@patch("amplifier_module_tool_remote_task.runner._poll_session_id", return_value=None)
+def test_run_async_command_redirects_to_output_file(mock_poll):
     client = MagicMock()
     client.run_background.return_value = 9876
     store = JobStore()
@@ -254,7 +258,8 @@ def test_run_sync_without_working_dir_no_cd():
     assert command.startswith("amplifier run")
 
 
-def test_run_async_with_working_dir_prefixes_cd():
+@patch("amplifier_module_tool_remote_task.runner._poll_session_id", return_value=None)
+def test_run_async_with_working_dir_prefixes_cd(mock_poll):
     client = MagicMock()
     client.run_background.return_value = 9876
     store = JobStore()
@@ -266,7 +271,8 @@ def test_run_async_with_working_dir_prefixes_cd():
     assert "amplifier run" in command
 
 
-def test_run_async_without_working_dir_no_cd():
+@patch("amplifier_module_tool_remote_task.runner._poll_session_id", return_value=None)
+def test_run_async_without_working_dir_no_cd(mock_poll):
     client = MagicMock()
     client.run_background.return_value = 9876
     store = JobStore()
